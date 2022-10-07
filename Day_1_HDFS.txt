@@ -1,0 +1,12 @@
+/hadoop/hdfs/data
+hdfs dfs -ls /
+vi srinivas.csv
+INGEST DATA FROM LOCAL TO HDFS
+hdfs dfs -put srinivas.csv /
+hdfs dfs -ls /user/
+hdfs dfs -put srinivas.csv /user/root/
+hdfs dfs -ls /user/root/
+hdfs dfs -cat /srinivas.csv
+rm srinivas.csv
+hdfs dfs -help
+hdfs dfs -checksum /srinivas.csv
