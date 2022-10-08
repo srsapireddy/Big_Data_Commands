@@ -1,0 +1,22 @@
+hdfs dfs -ls /
+APPEND TO FILE
+hdfs dfs -cat /srinivas.csv
+vi rahul.csv
+ls -ltr
+hdfs dfs -appendToFile rahul.csv /srinivas.csv
+hdfs dfs -cat /srinivas.csv
+---
+localhost:50070 - namenode UI
+localhost:50070/logs/ - namenode logs
+localhost:8088/ui2 - resource manager UI
+---
+vi word_count_data.txt
+hdfs dfs -put word_count_data.txt /user/root/ 
+hdfs dfs -cat /user/root/word_count_data.txt
+
+---WORKING COMMAND---
+hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-streaming.jar -input /user/root/word_count_data.txt -output /user/root/wcountputnewsrinivastest/ -mapper 'python mapper.py' -file /root/code/mapper.py -reducer 'python reduce.py' -file /root/code/reduce.py               
+
+hdfs dfs -ls /user/root/wcountputnewsrinivastest/
+hdfs dfs -cat /user/root/FILE_ID
+---
