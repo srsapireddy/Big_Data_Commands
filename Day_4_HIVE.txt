@@ -1,0 +1,126 @@
+!exit - to exit hive
+
+*** LOADING DATA ***
+
+---
+hive
+LOAD DATA LOCAL INPATH '/root/srinivas.csv' OVERWRITE INTO TABLE srinivas_tbl;
+
+create table if not exists srinivas_tbl
+(
+id string,
+name string,
+marks int
+)
+row format delimited
+fields terminated by ',';
+select * from srinivas_tbl;
+
+show databases;
+
+mkdir test
+cp srinivas.csv test/
+chmod 777 test
+hive
+
+cp test/srinivas.csv /tmp/
+hdfs dfs -put srinivas.csv /tmp/
+hive
+
+show create table srinivas_tbl; - this is in ORC format
+---change the table into csv table---
+create table if not exists srinivas_tbl_csv
+(
+id string,
+name string,
+marks int
+)
+row format delimited
+fields terminated by ','
+STORED AS TEXTFILE;
+
+show create table srinivas_tbl_csv;
+
+LOAD DATA LOCAL INPATH '/tmp/srinivas.csv' OVERWRITE INTO TABLE srinivas_tbl_csv;
+
+select * from srinivas_tbl_csv;
+---
+!hdfs dfs -ls /tmp/srinivas.csv; - not working
+---
+
+---HDFS LOCAL---
+hdfs dfs -ls /tmp/srinivas.csv
+ls /tmp/srinivas.csv
+hdfs dfs -rm /tmp/srinivas.csv
+- to check file is loaded from hdfs or file is loaded from HDFS
+hive
+LOAD DATA LOCAL INPATH '/tmp/srinivas.csv' OVERWRITE INTO TABLE srinivas_tbl_csv;
+select * from srinivas_tbl_csv;
+- data is getting loaded from local.
+---
+
+***INTERNAL TABLE VS EXTERNAL TABLE***
+create external table if not exists srinivas_tbl_csv_ext
+(
+id string,
+name string,
+marks int
+)
+row format delimited
+fields terminated by ','
+STORED AS TEXTFILE
+location '/tmp/exttable/';
+
+LOAD DATA LOCAL INPATH '/tmp/srinivas.csv' OVERWRITE INTO TABLE srinivas_tbl_csv_ext;
+
+select * from srinivas_tbl_csv_ext;
+
+show create table srinivas_tbl_csv_ext;
+
+drop table srinivas_tbl_csv_ext;
+
+
+CHECK IN HDFS FILE PATH
+hdfs dfs -ls /tmp/exttable/ - the data is still there
+---
+
+hive -e "select * from srinivas_tbl"; # without logging in we can run the query
+vi query.hql
+|
+-> select * from srinivas_tbl;
+hive -f query.hql (hql - hive query language)(good for the production environment)
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
