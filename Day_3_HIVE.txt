@@ -1,0 +1,49 @@
+hive - start the hive cli
+CREATE database ineuron_db;
+show databases;
+describe database ineuron_db; - where database is located
+use ineuron_db;
+show tables;
+drop database ineuron_db;
+show databases;
+---
+CREATE DATABASE ineuron_db
+LOCATION '/user/ineuron/mydb';
+
+create database ineuron_db location '/tmp/hivedb'; - new database is created in custom location
+
+use ineuron_db;
+
+create table if not exists emp_details
+(emp_name string,
+unit string,
+exp int,
+location string)
+row format delimited
+fields terminated by ',';
+
+show tables;
+
+show create table emp_details; - information from the metastore
+---
+show databases;
+use foodmart;
+show tables;
+
+select * from salary limit 5;
+explain select * from salary limit 5; - show the hive optimizer by CBO (Cost based optimizer)
+http://localhost:8088/ui2/#/cluster-overview - for YARN UI
+select max(pay_date),currency_id from salary group by currency_id limit 5;
+
+set hive.execution.engine=mr; - to run the job in map reduce mode
+
+
+
+
+
+
+
+
+
+
+
