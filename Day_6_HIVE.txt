@@ -1,0 +1,96 @@
+hive
+show databases;
+use foodmart;
+show tables;
+select * FROM PRODUCT LIMIT 2;
+---
+use ineuron_db;
+-
+create table emp_details_partitioned
+(
+emp_name string,
+unit string,
+exp int
+)
+partitioned by (location string);
+-
+show tables;
+select * from emp_details;
+show create table emp_details;
+--
+LOAD DATA LOCAL INPATH '/tmp/srinivas.csv' into table emp_details;
+use default;
+show tables;
+show create table srinivas_tbl;
+-
+use ineuron;
+show tables;
+select * from emp_details;
+show create table emp_details; -> This is in the ORC format
+--- file should be in csv format
+CREATE TABLE `emp_details_csv`(`emp_name` string,`unit` string,`exp` int,`location` string) ROW FORMAT SERDE 'org.apache.hadoop.hive.ql.io.orc.OrcSerde'  WITH SERDEPROPERTIES ('field.delim'=',','serialization.format'=',')  STORED AS TEXTFILE  LOCATION 'tmp/hivedb/emp_details';                                                                
+---
+show tables;
+LOAD DATA LOCAL INPATH '/tmp/srinivas.csv' into table emp_details_csv;
+select * from emp_details_csv; -> not working
+show create table emp_details_csv; -> file is still in the ORC format
+drop table emp_details_csv;
+---
+CREATE TABLE `emp_details_csv`(`emp_name` string,`unit` string,`exp` int,`location` string) row format delimited fields terminated by ','  STORED AS TEXTFILE  LOCATION 'tmp/hivedb/emp_details'; 
+---
+show emp_details_csv;
+LOAD DATA LOCAL INPATH '/tmp/srinivas.csv' into table emp_details_csv;
+--
+insert overwrite table emp_details_partitioned partition(location = 'BLR')
+select emp_name, unit, exp from emp_details_csv where location = 'BLR';
+---
+show databases;
+use foodmart;
+show tables;
+show create table region; -> ORC table
+describe formatted region; -> for more information
+--- CREATE PARQUE TABLE
+create table prq_table
+(
+c1 int,
+c2 int,
+c3 int,
+c4 int
+)
+stored as PARQUET;
+-
+show create table prq_table;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
