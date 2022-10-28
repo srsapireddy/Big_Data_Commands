@@ -1,0 +1,4 @@
+spark-shell - for scala intrepreter
+pyspark - for python interpreter
+pyspark --driver-memory 512M --executor-memory 1G --executor-cores 2 --num-executors 1 - to reduce memory
+pip install pyspark - for local environment 
