@@ -1,0 +1,83 @@
+mysql -u root -p
+password: hortonworks1
+
+show databases;
+use hive;
+show tables;
+select * from TBLS limit 5;
+quit
+
+//check connection
+sqoop import --connect jdbc:mysql://localhost:3306 --username root --password hortonworks1
+
+//list databases
+sqoop list-databases --connect jdbc:mysql://localhost:3306 --username root --password hortonworks1
+
+// list-tables
+sqoop list-tables --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1
+
+Single Mapper Import
+--------------------
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table TBLS --target-dir '/tmp/sqoophivetbls/' -m 1
+
+hdfs dfs -ls /tmp/
+hdfs dfs -ls /tmp/sqoophivetbls/ 
+hdfs dfs -cat /tmp/sqoophivetbls/part-m-00000   
+
+=============================
+Multi-Mapper Import
+-------------------
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table TBLS --target-dir '/tmp/sqoophivetblsmultimap/' -m 5
+
+sudo su hive
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table TBLS --target-dir '/tmp/sqoophivetblsHIVENEW1/' -m 5 --hive-import  -m 5 
+hive
+show tables;
+select * from tbls;
+! quit
+
+mysql -u root -p
+password: hortenworks1
+show databases;
+use hive
+
+create table company
+(
+id int,
+name varchar(20),
+location varchar(20)
+);
+
+insert into company values(1, 'ineuron','Bangalore');
+insert into company values(2, 'eduvista','Walnut');
+insert into company values(3, 'eduvista','Bangalore');
+
+select * from company;
+quit;
+
+Sqoop Export
+------------
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table company --target-dir '/tmp/company/' --split-by "id" -m 3
+
+mysql -u root -p
+use hive;
+delete from company;
+commit;
+quit;
+
+sqoop export --connect jdbc:mysql://localhost:3306/hive --username 'root' -password hortonworks1 --table 'company' --export-dir '/tmp/company/' --input-fields-terminated-by ',' -m 3 --columns id,name,location
+
+mysql -u root -p
+use hive;
+select * from company;
+
+-----
+Incremental
+-----
+insert into company values(4, 'ineuron','Bangalore');
+sqoop job --create myjob --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table company --target-dir '/tmp/company/' -m 3 --check-column id --incremental append --last-value 3
+
+
+
+
+
