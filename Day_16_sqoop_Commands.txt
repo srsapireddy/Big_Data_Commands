@@ -1,0 +1,173 @@
+mysql -u root -p
+password: hortonworks1
+
+show databases;
+use hive;
+show tables;
+select * from TBLS limit 5;
+quit
+
+//check connection
+sqoop import --connect jdbc:mysql://localhost:3306 --username root --password hortonworks1
+
+//list databases
+sqoop list-databases --connect jdbc:mysql://localhost:3306 --username root --password hortonworks1
+
+// list-tables
+sqoop list-tables --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1
+
+Single Mapper Import
+--------------------
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table TBLS --target-dir '/tmp/sqoophivetbls/' -m 1
+
+hdfs dfs -ls /tmp/
+hdfs dfs -ls /tmp/sqoophivetbls/ 
+hdfs dfs -cat /tmp/sqoophivetbls/part-m-00000   
+
+=============================
+Multi-Mapper Import
+-------------------
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table TBLS --target-dir '/tmp/sqoophivetblsmultimap/' -m 5
+
+sudo su hive
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table TBLS --target-dir '/tmp/sqoophivetblsHIVENEW1/' -m 5 --hive-import  -m 5 
+hive
+show tables;
+select * from tbls;
+! quit
+
+mysql -u root -p
+password: hortenworks1
+show databases;
+use hive
+
+create table company
+(
+id int,
+name varchar(20),
+location varchar(20)
+);
+
+insert into company values(1, 'ineuron','Bangalore');
+insert into company values(2, 'eduvista','Walnut');
+insert into company values(3, 'eduvista','Bangalore');
+
+select * from company;
+quit;
+
+Sqoop Export
+------------
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table company --target-dir '/tmp/company/' --split-by "id" -m 3
+
+mysql -u root -p
+use hive;
+delete from company;
+commit;
+quit;
+
+sqoop export --connect jdbc:mysql://localhost:3306/hive --username 'root' -password hortonworks1 --table 'company' --export-dir '/tmp/company/' --input-fields-terminated-by ',' -m 3 --columns id,name,location
+
+mysql -u root -p
+use hive;
+select * from company;
+
+-----
+Incremental
+-----
+insert into company values(4, 'ineuron','Bangalore');
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username root --password hortonworks1 --table 'company' --target-dir '/tmp/company/' -m 1 --check-column id --incremental append --last-value 3
+hdfs dfs -cat /tmp/company/*
+--- Day 2
+
+sudo su hive
+mysql -u root -p
+
+use hive;
+
+CREATE TABLE test_new (
+emp_id int,
+name varchar(100),
+salary int,
+update_time timestamp,
+PRIMARY KEY (emp_id) );
+
+INSERT INTO test_new values (1,"ABC",100,'2018-01-20 00:00:00');
+INSERT INTO test_new values (2,"ABC",200,'2018-01-20 00:00:00');
+INSERT INTO test_new values (3,"ABC",300,'2018-01-20 00:00:00');
+INSERT INTO test_new values (4,"ABC",400,'2018-01-20 00:00:00');
+
+select * from test_new;
+
+sqoop import --connect jdbc:mysql://localhost:3306/hive --username 'root' --password hortonworks1 --table 'test_new' --target-dir '/tmp/test_new/'
+
+hdfs dfs -cat /tmp/test_new/*
+
+mysql -u root -p
+
+use hive;
+INSERT INTO test_new values (5,"ABC",500,'2018-01-20 00:00:00');
+
+select * from test_new;
+quit;
+
+INCREMENTAL IMPORT
+sqoop import --connect jdbc:mysql://localhost:3306/hive --incremental append --check-column emp_id --last-value 4 --username root --password hortonworks1 --table test_new --target-dir '/tmp/test_new/'
+THIS SHOULD BE REFLECTED IN HADOOP AFTER RUNNING THIS COMMAND
+
+---
+select mad(id) from test_new; > file.txt
+cat file.txt>$var
+---
+
+hdfs dfs -cat /tmp/test_new/*
+------------------------------
+mysql -u root -p
+
+INSERT INTO test_new values (6,'ABC',600,'2018-01-22 00:00:00');
+update test_new set name='XYZ' , update_time='2018-01-22 00:00:00' where emp_id=4;
+
+select * from test_new;
+---- IF WE HAVE PRIMARY KEY WE DO NOT NEED TIMESTAMP
+quit;
+
+INCREMENTAL LAST MODIFIED
+hdfs dfs -cat /tmp/test_new/*
+
+sqoop import --connect jdbc:mysql://localhost:3306/hive --incremental lastmodified --check-column update_time --last-value 2018-01-21 --merge-key emp_id --username root --password hortonworks1 --table test_new --target-dir '/tmp/test_new/'
+hdfs dfs -cat /tmp/test_new/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
